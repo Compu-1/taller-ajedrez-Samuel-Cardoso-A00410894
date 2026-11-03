@@ -85,6 +85,23 @@ public class ChessRulesTest {
     }
 
     @Test
+    public void testLegalMovesCannotCaptureOpponentKing() {
+        ChessPiece[][] board = new ChessPiece[8][8];
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                board[r][c] = ChessRules.createEmpty();
+            }
+        }
+        board[7][7] = ChessRules.createPiece(PieceType.PIECEKING, PieceColor.COLORWHITE);
+        board[0][0] = ChessRules.createPiece(PieceType.PIECEKING, PieceColor.COLORBLACK);
+        board[7][0] = ChessRules.createPiece(PieceType.PIECEROOK, PieceColor.COLORWHITE);
+
+        List<Position> legalMoves = ChessRules.getLegalMoves(board, new Position(7, 0));
+
+        assertFalse(legalMoves.stream().anyMatch(p -> p.row == 0 && p.col == 0));
+    }
+
+    @Test
     public void testFoolsMateCheckmate() {
         // Mate del loco:
         // 1. f3 e5

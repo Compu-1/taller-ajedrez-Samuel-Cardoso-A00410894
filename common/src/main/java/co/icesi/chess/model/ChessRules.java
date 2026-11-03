@@ -360,6 +360,10 @@ public class ChessRules {
 
         List<Position> candidates = getPseudoLegalMoves(board, from);
         for (Position to : candidates) {
+            ChessPiece target = board[to.row][to.col];
+            if (target.type == PieceType.PIECEKING) {
+                continue;
+            }
             ChessPiece[][] sim = simulateMove(board, from, to);
             if (!isKingInCheck(sim, piece.color)) {
                 legal.add(to);

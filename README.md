@@ -1,3 +1,4 @@
+
 # Ajedrez Distribuido con ZeroC Ice (JavaFX & Vanilla JavaScript)
 
 Proyecto distribuido de ajedrez cliente-servidor desarrollado para el curso **Computación en Internet I (09776 - TIC)** de la **Universidad Icesi**.
@@ -11,8 +12,8 @@ Implementa dos clientes completos e interoperables que consumen el mismo servici
 ## Características Principales
 
 1. **Invitación a Partidas por Código de Sala (`Room Code`):**
-   - Un jugador puede crear una sala privada. El servidor genera un código alfanumérico único (ej. `R-8K2NX`).
-   - Los rivales y observadores se unen inmediatamente ingresando el código de sala desde JavaFX o desde la Web en JavaScript.
+   - Un jugador crea una sala y el servidor genera un código alfanumérico único (ej. `R-8K2NX`).
+   - Los rivales y observadores pueden unirse ingresando el código desde JavaFX o la Web, o seleccionando la sala en el listado de salas activas.
 
 2. **Roles Dinámicos (Blancas, Negras y Espectadores):**
    - **Primer participante:** Asignado automáticamente al rol **Blancas** (`ROLEWHITE`).
@@ -65,11 +66,10 @@ codigo_base/
     ├── package.json      # Dependencia "ice": "^3.7.110"
     ├── index.html        # Punto de montaje único (<div id="root"></div>)
     ├── styles.css        # Estilos de la aplicación
-    ├── ChessService.js   # Generado desde ChessService.ice con slice2js
     └── src/
         ├── app.js        # Controlador principal y montaje en #root
         ├── components/   # Componentes DOM (Header, LobbyView, GameView, ChessBoard, PlayerCard, MoveHistory, TierBadge)
-        └── services/     # Servicios Ice y reglas (chessClientService, chessRulesHelper)
+        └── services/     # Servicios Ice/reglas; ChessService.js se genera aquí con slice2js
 ```
 
 ---

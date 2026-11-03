@@ -8,6 +8,12 @@ import org.junit.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.*;
 
@@ -118,5 +124,43 @@ public class ChessIntegrationTest {
         assertEquals(1230, leaderboard[0].points);
         assertEquals("Bob", leaderboard[1].nickname);
         assertEquals(1180, leaderboard[1].points);
+
+        assertFalse(java.util.Arrays.stream(service.getActiveRooms(null))
+                .anyMatch(room -> room.roomCode.equals(roomCode)));
+    }
+
+    @Test
+    public void testConcurrentRoomJoinsAssignUniquePlayerRoles() throws Exception {
+        String roomCode = service.createRoom("Alice", null);
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        List<Future<JoinRoomResult>> joins = new ArrayList<>();
+
+        try {
+            for (String nickname : new String[]{"Bob", "Charlie", "David"}) {
+                joins.add(executor.submit(() -> {
+                    start.await();
+                    return service.joinRoom(roomCode, nickname, null);
+                }));
+            }
+            start.countDown();
+
+            int blackPlayers = 0;
+            int spectators = 0;
+            for (Future<JoinRoomResult> join : joins) {
+                PlayerRole role = join.get().role;
+                if (role == PlayerRole.ROLEBLACK) {
+                    blackPlayers++;
+                } else if (role == PlayerRole.ROLESPECTATOR) {
+                    spectators++;
+                }
+            }
+
+            assertEquals(1, blackPlayers);
+            assertEquals(2, spectators);
+            assertEquals(2, service.getGameState(roomCode, null).spectatorCount);
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }

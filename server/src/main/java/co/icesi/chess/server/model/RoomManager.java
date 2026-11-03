@@ -3,6 +3,7 @@ import co.icesi.chess.model.TierManager;
 
 import ChessApp.RoomNotFoundException;
 import ChessApp.RoomSummary;
+import ChessApp.GameStatus;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -52,7 +53,13 @@ public class RoomManager {
     public RoomSummary[] getActiveRooms() {
         List<RoomSummary> list = new ArrayList<>();
         for (GameRoom r : rooms.values()) {
-            list.add(r.getSummary());
+            RoomSummary summary = r.getSummary();
+            if (summary.status == GameStatus.WAITINGFORPLAYERS
+                    || summary.status == GameStatus.INPROGRESS
+                    || summary.status == GameStatus.CHECKWHITE
+                    || summary.status == GameStatus.CHECKBLACK) {
+                list.add(summary);
+            }
         }
         return list.toArray(new RoomSummary[0]);
     }
