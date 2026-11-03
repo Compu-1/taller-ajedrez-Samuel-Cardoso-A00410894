@@ -43,7 +43,7 @@ export class ChessRealtimeObserver {
         servant.onGameFinishedCallback = this.onGameFinishedCallback;
 
         // Un adaptador sin endpoints solo puede recibir llamadas usando una conexión ya abierta.
-        this.adapter = communicator.createObjectAdapter("");
+        this.adapter = await communicator.createObjectAdapter("");
         this.identity = new this.Ice.Identity(this.Ice.generateUUID(), "ChessObserver");
         const baseProxy = this.adapter.add(servant, this.identity);
         this.adapter.activate();

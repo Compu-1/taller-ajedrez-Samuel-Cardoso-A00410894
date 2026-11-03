@@ -115,4 +115,30 @@ El enunciado oficial y los criterios de evaluación detallados se encuentran dis
 - [Guía del Taller en PDF](docs/Taller_Ajedrez_Ice_JavaFX.pdf)
 
 
-DESARROLLO PREGUNTAS PDF.
+## Respuestas al cuestionario del PDF
+
+1. Conexiones bidireccionales (BiDir) vs. callbacks tradicionales
+
+Un navegador web no puede abrir un puerto para escuchar conexiones, así que el servidor no tiene forma de conectarse al cliente para notificarle eventos (por ejemplo, “el rival movió”). Por eso el cliente crea un ObjectAdapter sin endpoints con createObjectAdapter(""): este adaptador no escucha en ningún puerto, solo registra el objeto que va a recibir las llamadas. Luego se asocia a la conexión que ya existe con servicePrx.ice_getConnection(), de modo que el servidor pueda invocar al cliente por la misma conexión que el cliente abrió.
+
+En el servidor, observer.ice_fixed(current.con) crea un proxy atado a esa conexión (current.con). Así, cuando el servidor llama al observer, Ice envía la invocación por esa conexión y no intenta abrir una nueva hacia el cliente, que no sería posible.
+
+En los callbacks tradicionales el cliente debe tener un endpoint accesible. En BiDir no hace falta, y por eso funciona en navegadores.
+
+2. Transporte TCP vs. WebSockets en ZeroC Ice
+
+En Ice la lógica del servicio (el servant) está separada del transporte. ChessServiceImpl no sabe por cuál protocolo llegó la petición. Lo que se hace es configurar un solo ObjectAdapter con dos endpoints:
+
+Los clientes JavaFX entran por TCP (10000) y los clientes JavaScript por WebSockets (10002), porque el navegador no permite sockets TCP crudos. Ambos endpoints están en el mismo adaptador, que tiene una única instancia de ChessServiceImpl, y Ice despacha todas las peticiones al mismo servant. Así no se duplica la lógica de negocio.
+
+3. Empaquetado del contrato con slice2js
+
+slice2js compila el archivo .ice y genera ChessService.js, que contiene en JavaScript los tipos, proxies y operaciones definidos en el contrato. Este archivo registra el espacio de nombres ChessApp en el navegador (a partir del module ChessApp de Slice) y cuelga de él las clases y proxies, por ejemplo ChessApp.ChessServicePrx.
+
+Se debe importar primero Ice.min.js porque ChessService.js depende del runtime de Ice (Ice.Value, Ice.ObjectPrx, etc.). Si se carga antes, esos objetos no existen todavía y aparece el error Ice is not defined.
+
+4. Validación autoritativa en GameRoom.makeMove
+
+Las casillas candidatas que calcula chessRulesHelper.js son solo una ayuda visual para el usuario. El código JavaScript corre en el navegador, donde el usuario puede modificarlo o enviar peticiones directas al servidor con jugadas ilegales (trampas). Por eso el servidor no puede confiar en el cliente.
+
+Además, el servidor es quien guarda el estado real de la partida, y en makeMove verifica que sea el turno del jugador, que la pieza le pertenezca y que el movimiento cumpla las reglas. Esto garantiza que todos los clientes (JavaFX y JavaScript) vean el mismo estado y las mismas reglas.
