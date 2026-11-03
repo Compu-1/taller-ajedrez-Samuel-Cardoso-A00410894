@@ -113,3 +113,6 @@ Verifica el motor autoritativo de ajedrez y la concurrencia distribuida de salas
 ## Guía del Taller Académico
 El enunciado oficial y los criterios de evaluación detallados se encuentran disponibles en:
 - [Guía del Taller en PDF](docs/Taller_Ajedrez_Ice_JavaFX.pdf)
+
+
+DESARROLLO PREGUNTAS PDF.
